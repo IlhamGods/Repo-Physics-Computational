@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+def cv(suhu):
+    return 12.47
+
+suhu_awal = 300
+suhu_akhir = 400
+jumlah_interval_range = range(1000,3000)
+hasil_perhitungan = []
+
+# Mencari jumlah interval dengan ketelitian terbaik
+ketelitian_terbaik = None
+jumlah_interval_terbaik = None
+
+for jumlah_interval in jumlah_interval_range:
+    delta_t = (suhu_akhir - suhu_awal) / jumlah_interval
+    jumlah_simpson = cv(suhu_awal) + cv(suhu_akhir)
+
+    for i in range(1, jumlah_interval):
+        suhu_titik_i = suhu_awal + i * delta_t
+        if i % 2 == 0:
+            jumlah_simpson += 2 * cv(suhu_titik_i)
+        else:
+            jumlah_simpson += 4 * cv(suhu_titik_i)
+
+    delta_u = (delta_t / 3) * jumlah_simpson
+    ketelitian = abs(delta_u - 1247.83)
+
+    if ketelitian_terbaik is None or ketelitian < ketelitian_terbaik:
+        ketelitian_terbaik = ketelitian
+        jumlah_interval_terbaik = jumlah_interval
+
+    hasil_perhitungan.append([jumlah_interval, delta_u, ketelitian])
+
+# Membuat DataFrame dari hasil perhitungan
+df = pd.DataFrame(hasil_perhitungan, columns=["Jumlah Interval", "ΔU (J)", "error (%)"])
+
+# Menampilkan tabel hasil perhitungan
+print("Tabel Hasil Perhitungan:")
+print(df)
+
+# Suhu dan nilai Cv pada setiap titik
+suhu_titik = np.linspace(suhu_awal, suhu_akhir, jumlah_interval_terbaik + 1)
+cv_titik = [cv(suhu) for suhu in suhu_titik]
+
+# Menampilkan grafik
+plt.figure(figsize=(8, 6))
+plt.plot(suhu_titik, cv_titik, marker='o', linestyle='-')
+plt.xlabel('Suhu (K)')
+plt.ylabel('Cv (J/(mol·K))')
+plt.title(f'Perubahan Cv terhadap Suhu (Ketelitian: {ketelitian_terbaik:.4f} %)')
+plt.grid(True)
+plt.show()
+
+# Menampilkan jumlah interval terbaik dan ketelitiannya
+print(f"Jumlah Interval Terbaik: {jumlah_interval_terbaik}")
+print(f"error: {ketelitian_terbaik:.4f} %")
