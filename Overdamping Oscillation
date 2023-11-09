@@ -1,0 +1,25 @@
+#Overdamping by Samuel Desmon Wesly Togatorop
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameter osilasi redaman besar
+amplitudo = 1.0  # Amplitudo awal
+frekuensi = 1.0  # Frekuensi osilasi
+rasio_redaman = 0.2  # Rasio redaman
+waktu = np.linspace(0, 10, 1000)  # Waktu dari 0 hingga 10 dengan 1000 titik
+
+# Perhitungan osilasi redaman besar
+omega = 2 * np.pi * frekuensi
+gamma = 2 * np.pi * rasio_redaman
+osilasi = amplitudo * np.exp(-gamma * time) * np.cos(omega * waktu)
+
+# Membuat plot
+plt.figure(figsize=(10, 6))
+plt.plot(waktu, osilasi, label='Osilasi Redaman Besar')
+plt.xlabel('Waktu')
+plt.ylabel('Amplitudo')
+plt.title('Osilasi Redaman Besar')
+plt.grid(True)
+plt.legend()
+plt.show()
