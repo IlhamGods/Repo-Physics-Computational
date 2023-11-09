@@ -1,0 +1,28 @@
+#made By Samuel Desmon
+#Visit Github: IlhamGods
+#Waifu aing Rikka Takanashi BTW
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the parameters of the system
+m = 1  # mass of the object
+k = 1  # spring constant
+b = 0.5  # damping coefficient
+
+# Calculate the natural frequency and damping ratio
+wn = np.sqrt(k/m)
+zeta = b/(2*np.sqrt(k*m))
+
+# Create a time vector
+t = np.linspace(0, 10, 100)
+
+# Calculate the displacement of the object
+x = np.exp(-zeta*wn*t) * np.cos(wn*np.sqrt(1-zeta**2)*t)
+
+# Plot the displacement
+plt.plot(t, x)
+plt.xlabel('Time (s)')
+plt.ylabel('Displacement (m)')
+plt.title('Critically Damped Oscillations')
+plt.show()
