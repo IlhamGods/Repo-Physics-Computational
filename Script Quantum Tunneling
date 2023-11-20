@@ -1,0 +1,101 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from IPython.display import HTML
+plt.style.use("seaborn-v0_8-whitegrid")
+
+class Gaussian_Wave:
+
+    def __init__(self, N_grid, L, a, V0, w, x0, k0, sigma, t):
+
+        self.t = t
+        self.L = L
+        self.N_grid = N_grid
+
+        self.x = np.linspace(0, self.L, self.N_grid + 1)  # grid of points
+        self.dx = self.x[1] - self.x[0]  # grid point spacing or 'discrete' analogue of the differential length
+
+        def integral(f, axis=0):
+            """This function allows us to approximate integrals in discrete space"""
+            return np.sum(f * self.dx, axis=axis)
+
+        self.Psi0 = np.exp(-1/2 * (self.x[1:-1] - x0)**2 / sigma**2) * np.exp(1j * k0 * self.x[1:-1])
+
+        # Use this range for x because we need the wavefunction to be 0 at the endpoints of the grid.
+
+        # Normalize the initial state
+        norm = integral(np.abs(self.Psi0)**2)
+        self.Psi0 = self.Psi0 / np.sqrt(norm)
+
+        # Kinetic energy
+        self.T = -1/2 * 1 / self.dx**2 * (np.diag(-2 * np.ones(self.N_grid - 1)) +
+                                          np.diag(np.ones(self.N_grid - 2), 1) +
+                                          np.diag(np.ones(self.N_grid - 2), -1))
+
+        # Potential as a flat array
+        self.V_flat = np.array([V0 if a < pos < a + w else -0.01 for pos in self.x[1:-1]])
+
+        # Potential energy as a diagonal matrix
+        self.V = np.diag(self.V_flat)
+
+        # Hamiltonian
+        self.H = self.T + self.V
+
+    def animation(self):
+
+        def integral(f, axis=0):
+            """This function allows us to approximate integrals in discrete space"""
+            return np.sum(f * self.dx, axis=axis)
+
+        # Get eigenvalues and eigenvectors and normalize
+        E, psi = np.linalg.eigh(self.H)
+        psi = psi.T
+        norm = integral(np.abs(psi)**2)
+        psi = psi / np.sqrt(norm)
+
+        # Get expansion coefficients
+        c_n = np.zeros_like(psi[0], dtype=complex)
+        for j in range(0, self.N_grid - 1):
+            c_n[j] = integral(np.conj(psi[j]) * self.Psi0)  # For each eigenvector, compute the inner product
+
+        # Get a function that returns the time-dependent wavefunction
+        def Psi(t):
+            return psi.T @ (c_n * np.exp(-1j * E * t))
+
+        fig = plt.figure(figsize=(20, 12))
+        ax = plt.axes(xlim=(0, self.L), ylim=(-0.25, 0.25))
+        line, = ax.plot([], [], lw=2)
+        ax.plot(self.x[1:-1], self.V_flat, label='$V(x)$')
+        ax.set_title('Gaussian wave packet with a potential barrier', fontsize=20)
+        line1, = ax.plot(self.x[1:-1], np.zeros(self.N_grid - 1), lw=2, color="red", label='$\Re(\psi)$')
+        line2, = ax.plot(self.x[1:-1], np.zeros(self.N_grid - 1), lw=2, color="blue", label='$\Im(\psi)$')
+        ax.legend(fontsize=15)
+        ax.set_xlabel('$x$', fontsize=15)
+
+        def animate(t):
+            y1 = np.real(Psi(t))
+            y2 = np.imag(Psi(t))
+            line1.set_data(self.x[1:-1], y1)
+            line2.set_data(self.x[1:-1], y2)
+            return line1, line2
+
+        def init():
+            line1.set_data([], [])
+            line2.set_data([], [])
+            return line1, line2
+
+        ani = FuncAnimation(fig, animate, frames=len(self.t), init_func=init, interval=20, blit=False)
+        return ani
+
+N_grid = 750
+L = 750
+a = 420
+V0 = 0.1
+w = 50
+x0 = 100
+k0 = 0.4
+sigma = 15
+t = np.linspace(0., 2500, 1000)
+wavepacket = Gaussian_Wave(N_grid, L, a, V0, w, x0, k0, sigma, t)
+Psi = wavepacket.animation()
+HTML(Psi.to_jshtml())
