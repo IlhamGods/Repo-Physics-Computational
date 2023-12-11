@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def generate_seismic_wave(duration, dt):
+    # Generate a random seismic wave
+    t = np.arange(0, duration, dt)
+    seismic_wave = np.random.randn(len(t))
+    return t, seismic_wave
+
+def simulate_isolation(t, seismic_wave, isolation_factor):
+    # Simulate the seismic wave after being dampened by an isolator
+    isolated_wave = seismic_wave * np.exp(-isolation_factor * t)
+    return isolated_wave
+
+def calculate_average_amplitude(seismic_wave):
+    # Calculate the average amplitude of the seismic wave
+    average_amplitude = np.mean(np.abs(seismic_wave))
+    return average_amplitude
+
+def plot_wave(t, seismic_wave, isolated_wave):
+    # Plot the seismic wave and the isolated wave
+    plt.figure(figsize=(10, 6))
+    plt.plot(t, seismic_wave, label='Seismic Wave')
+    plt.plot(t, isolated_wave, label='Isolated Wave')
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.title('Seismic Wave and Isolated Wave')
+    plt.legend()
+    plt.show()
+
+# Main simulation parameters
+duration = 10  # seconds
+dt = 0.01  # time step
+isolation_factor = 0.1  # adjust the isolation factor as needed
+
+# Generate seismic wave
+t, seismic_wave = generate_seismic_wave(duration, dt)
+
+# Simulate isolated wave
+isolated_wave = simulate_isolation(t, seismic_wave, isolation_factor)
+
+# Calculate average amplitude
+average_amplitude = calculate_average_amplitude(isolated_wave)
+
+# Plot the waves
+plot_wave(t, seismic_wave, isolated_wave)
+
+# Print the average amplitude
+print(f'Average Amplitude of Isolated Wave: {average_amplitude}')
